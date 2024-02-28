@@ -43,12 +43,13 @@ class CameraObject():
         return success, frame
     
     def save_photo(self, frame, save_directory):
-        print("Save Image")
-        time.sleep(0.5)
+        print("\nSave Image")
+        time.sleep(1)
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         file_index = len(os.listdir(save_directory)) + 1
         filename = "image{}_{}.jpg".format(timestamp, file_index)
         cv2.imwrite(os.path.join(save_directory, filename), frame)
+        time.sleep(1)
 
     def control_servo(self):
         pygame.init()

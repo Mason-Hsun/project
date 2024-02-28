@@ -4,6 +4,7 @@ import time
 import utils
 import numpy as np
 from camera_control import CameraObject
+from encryption import RC4 
 import multiprocessing
 from ultralytics import YOLO
 from datetime import datetime
@@ -39,11 +40,12 @@ class TrashTracker:
     def run(self):
         try:
             camera = CameraObject()
+            encypt = RC4(self.save_directory)
             #camera.start_control()
+            encypt.start_thread()
             while camera.is_opened:
                 success, frame = camera.capture_frame()
                 if success:
-                   # cv2.imshow("Trash detected !!", frame)
                     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     update_frame = self.process_frame(frame)
                     if update_frame is not None:
