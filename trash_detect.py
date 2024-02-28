@@ -4,14 +4,13 @@ import time
 import utils
 import numpy as np
 from camera_control import CameraObject
-from threading import Thread
+import multiprocessing
 from ultralytics import YOLO
 from datetime import datetime
 from filterpy.kalman import KalmanFilter
 class TrashTracker:
-    def __init__(self, num_photos, save_directory):
+    def __init__(self, save_directory):
         self.photo_index = 1
-        self.num_photos = num_photos
         self.confidence_threshold = 0.7
         self.save_directory = save_directory
         # Get model
@@ -40,12 +39,12 @@ class TrashTracker:
     def run(self):
         try:
             camera = CameraObject()
-            camera_control_thread = Thread(target=camera.control_servo(), args=(camera))
-            camera_control_thread.start()
-            exit(1)
-            while (num_photos is None) or (num_photos > 0) and camera.is_opened:
+            #camera.start_control()
+            while camera.is_opened:
                 success, frame = camera.capture_frame()
                 if success:
+                    cv2.imshow("Trash detected !!", frame)
+                    exit(1)
                     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     update_frame = self.process_frame()
                     if update_frame is not None:
@@ -53,11 +52,11 @@ class TrashTracker:
                         time.sleep(1)
                         cv2.destroyAllWindows()
                         camera.save_photo(update_frame, self.save_directory)
-                    if num_photos is not None:
-                        num_photos -= 1
                     if cv2.waitKey(1) & 0xFF == ord("q"):
                         break
-            camera_control_thread.join()
+                else:
+                    print("Failed to capture photo")
+            #camera_control_thread.join()
             camera.close_camera()
         except Exception as e:
             pass

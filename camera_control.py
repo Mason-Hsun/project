@@ -4,6 +4,7 @@ import time
 import pygame
 import numpy as np
 import trash_detect
+import threading
 from datetime import datetime
 from gpiozero import Servo
 from gpiozero.pins.pigpio import PiGPIOFactory
@@ -19,7 +20,7 @@ class CameraObject():
         os.environ['PIGPIO_ADDR'] = '192.168.50.69'  
         os.environ['PIGPIO_PORT'] = '8888' 
         try:
-            self.camera = cv2.VideoCapture(0)
+            self.camera = cv2.VideoCapture(1)
             self.is_opened = self.camera.isOpened()
             print("PiCamera opened successfully")
         except picamera.exc.PiCameraError:
@@ -38,7 +39,7 @@ class CameraObject():
         
         
     def capture_frame(self):
-        success, frame = cap.read()
+        success, frame = self.camera.read()
         return success, frame
     
     def save_photo(self, frame, save_directory):
@@ -68,6 +69,8 @@ class CameraObject():
                 if event.type == pygame.QUIT:
                     running = False
         pygame.quit()    
-            
-       
-        
+    
+    def start_control(self):
+        servo_control_thread = threading.Thread(target=self.control_servo)
+        servo_control_thread.start()
+
