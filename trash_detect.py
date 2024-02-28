@@ -3,12 +3,11 @@ import cv2
 import time
 import utils
 import numpy as np
-import camera_control
+from camera_control import CameraObject
 from threading import Thread
 from ultralytics import YOLO
 from datetime import datetime
 from filterpy.kalman import KalmanFilter
-
 class TrashTracker:
     def __init__(self, num_photos, save_directory):
         self.photo_index = 1
@@ -16,8 +15,8 @@ class TrashTracker:
         self.confidence_threshold = 0.7
         self.save_directory = save_directory
         # Get model
-        self.model = YOLO('models/s7.pt')
-        self.model_h = YOLO('models/h.pt')
+        self.model = YOLO(os.path.join(os.getcwd(), "s7.pt"))
+        self.model_h = YOLO(os.path.join(os.getcwd(), "h.pt"))
         self.count = 0
         # Kalman filter
         self.dt = 1.0
@@ -37,11 +36,13 @@ class TrashTracker:
         kf.P *= 1e2
         return kf
     
+
     def run(self):
         try:
-            camera = camera_control.CameraObject()
-            camera_control_thread = Thread(target=camera.control_servo)
+            camera = CameraObject()
+            camera_control_thread = Thread(target=camera.control_servo(), args=(camera))
             camera_control_thread.start()
+            exit(1)
             while (num_photos is None) or (num_photos > 0) and camera.is_opened:
                 success, frame = camera.capture_frame()
                 if success:
@@ -56,9 +57,10 @@ class TrashTracker:
                         num_photos -= 1
                     if cv2.waitKey(1) & 0xFF == ord("q"):
                         break
-        finally:
             camera_control_thread.join()
             camera.close_camera()
+        except Exception as e:
+            pass
                 
     def process_frame(self, frame):
         results = self.model(frame, self.confidence_threshold)

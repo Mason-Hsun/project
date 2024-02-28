@@ -2,10 +2,10 @@ import os
 import cv2 
 import time
 import pygame
-import picamera
 import numpy as np
-from gpiozero import Servo
+import trash_detect
 from datetime import datetime
+from gpiozero import Servo
 from gpiozero.pins.pigpio import PiGPIOFactory
 
 class CameraObject():
@@ -19,16 +19,17 @@ class CameraObject():
         os.environ['PIGPIO_ADDR'] = '192.168.50.69'  
         os.environ['PIGPIO_PORT'] = '8888' 
         try:
-            self.camera = picamera.PiCamera()
-            self.camera.resolution = (1024, 768)
-            self.is_opened = True
-            self.camera.vflip = True
-            self.raw_capture = picamera.array.PiRGBArray(self.camera)
+            self.camera = cv2.VideoCapture(0)
+            self.is_opened = self.camera.isOpened()
             print("PiCamera opened successfully")
         except picamera.exc.PiCameraError:
             print("Failed to open PiCamera")
             exit(1)
-        
+        except Exception as e:
+            print("{}".format(e))
+            exit(1)
+        self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1024)
+        self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 768)
         
     
     def close_camera(self):
@@ -37,16 +38,15 @@ class CameraObject():
         
         
     def capture_frame(self):
-        self.raw_capture.truncate(0)
-        self.camera.capture(self.raw_capture, format="rgb", use_video_port=True)
-        return True, self.raw_capture.array
+        success, frame = cap.read()
+        return success, frame
     
     def save_photo(self, frame, save_directory):
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         file_index = len(os.listdir(self.save_directory) + 1)
         filename = f"image{file_index}_{timestamp}.jpg"
         cv2.imwrite(os.path.join(save_directory, filename), frame)
-    
+
     def control_servo(self):
         pygame.init()
         pygame.display.set_mode((400, 300))
