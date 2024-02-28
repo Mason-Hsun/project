@@ -20,7 +20,7 @@ class CameraObject():
         os.environ['PIGPIO_ADDR'] = '192.168.50.69'  
         os.environ['PIGPIO_PORT'] = '8888' 
         try:
-            self.camera = cv2.VideoCapture(1)
+            self.camera = cv2.VideoCapture(0)
             self.is_opened = self.camera.isOpened()
             print("PiCamera opened successfully")
         except picamera.exc.PiCameraError:
@@ -43,9 +43,11 @@ class CameraObject():
         return success, frame
     
     def save_photo(self, frame, save_directory):
+        print("Save Image")
+        time.sleep(0.5)
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        file_index = len(os.listdir(self.save_directory) + 1)
-        filename = f"image{file_index}_{timestamp}.jpg"
+        file_index = len(os.listdir(save_directory)) + 1
+        filename = "image{}_{}.jpg".format(timestamp, file_index)
         cv2.imwrite(os.path.join(save_directory, filename), frame)
 
     def control_servo(self):

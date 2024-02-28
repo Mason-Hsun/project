@@ -1,6 +1,7 @@
+import os
 import trash_detect
 def main():
-    save_photo_directory = "/home/pi/Desktop/拍攝照片"
+    save_photo_directory = os.path.join(os.getcwd(), "save")
     
         
     try:

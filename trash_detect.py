@@ -43,14 +43,12 @@ class TrashTracker:
             while camera.is_opened:
                 success, frame = camera.capture_frame()
                 if success:
-                    cv2.imshow("Trash detected !!", frame)
-                    exit(1)
+                   # cv2.imshow("Trash detected !!", frame)
                     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    update_frame = self.process_frame()
+                    update_frame = self.process_frame(frame)
                     if update_frame is not None:
-                        cv2.imshow("Trash detected !!", update_frame)
-                        time.sleep(1)
-                        cv2.destroyAllWindows()
+                        #cv2.imshow("Trash detected !!", update_frame)
+                        #cv2.destroyAllWindows()
                         camera.save_photo(update_frame, self.save_directory)
                     if cv2.waitKey(1) & 0xFF == ord("q"):
                         break
@@ -76,7 +74,6 @@ class TrashTracker:
         z = np.array([center_x, center_y])
         self.kf.update(z)
         pred_state = self.kf.x
-        self.prev_center = (center_x, center_y)
         cv2.rectangle(frame,
             (int(pred_state[0] - (x2 - x1) // 2), int(pred_state[2] - (y2 - y1) // 2)),
             (int(pred_state[0] + (x2 - x1) // 2), int(pred_state[2] + (y2 - y1) // 2)),
@@ -91,12 +88,15 @@ class TrashTracker:
         update_frame = None
         if self.prev_center is not None:
             displacement = np.sqrt((center_x - self.prev_center[0]) ** 2 + (center_y - self.prev_center[1]) ** 2)
-            speed_threshold = 10
+            speed_threshold = 5
             if displacement > speed_threshold:
+                time.sleep(1)
                 return self.detect_persion(frame)
             else:
                 return None
-        return None       
+        else:
+            self.prev_center = (center_x, center_y)
+            return None       
         
     def detect_persion(self, frame):
         results_h = self.model_h(frame)
