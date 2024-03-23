@@ -4,6 +4,8 @@ import os
 import time
 import utils
 import threading
+import sys
+from datetime import datetime
 class RC4:
     def __init__(self, save_directory):
         self.initial_key = "04070e5d02b9155a16034f9b02a0776c"
@@ -43,6 +45,7 @@ class RC4:
         return key_stream
 
     def RC4_img(self, filepath):
+        now = datetime.now()
         if not self.key_written:
             key_stream = self.generate_key()
             self.key_written = True
@@ -50,8 +53,8 @@ class RC4:
             key_stream = self.generate_key()
 
         
-
         output_image_path = filepath
+    
         frame = cv2.imread(filepath)
         height = frame.shape[0]
         weight = frame.shape[1]

@@ -40,6 +40,8 @@ class CameraObject():
         
     def capture_frame(self):
         success, frame = self.camera.read()
+        if success:
+            frame = cv2.resize(frame, (256, 256))
         return success, frame
     
     def save_photo(self, frame, save_directory):

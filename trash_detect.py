@@ -4,6 +4,7 @@ import time
 import utils
 import numpy as np
 from camera_control import CameraObject
+from transfer import FileSender
 from encryption import RC4 
 import multiprocessing
 from ultralytics import YOLO
@@ -41,7 +42,9 @@ class TrashTracker:
         try:
             camera = CameraObject()
             encypt = RC4(self.save_directory)
-            #camera.start_control()
+            transfer = FileSender(self.save_directory)
+            transfer.start_thread()
+            camera.start_control()
             encypt.start_thread()
             while camera.is_opened:
                 success, frame = camera.capture_frame()
@@ -56,7 +59,7 @@ class TrashTracker:
                         break
                 else:
                     print("Failed to capture photo")
-            #camera_control_thread.join()
+            camera_control_thread.join()
             camera.close_camera()
         except Exception as e:
             pass
@@ -111,4 +114,3 @@ class TrashTracker:
                 cv2.putText(frame, "Class: huang-zi-yu", (int(x1_h), int(y1_h) - 10),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1, cv2.LINE_AA)
         return frame
-
