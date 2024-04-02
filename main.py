@@ -1,7 +1,7 @@
 import os
 import trash_detect
 def main():
-    save_photo_directory = os.path.join(os.getcwd(), "save")
+    save_photo_directory = os.path.join(os.getcwd(),"encryption")
     
         
     try:

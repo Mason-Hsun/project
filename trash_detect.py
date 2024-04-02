@@ -107,10 +107,17 @@ class TrashTracker:
         results_h = self.model_h(frame)
         for r_h in results_h:
             for j, (x1_h, y1_h, x2_h, y2_h) in enumerate(r_h.boxes.xyxy):
-                cv2.rectangle(frame,
-                              (int(x1_h), int(y1_h)),
-                              (int(x2_h), int(y2_h)),
-                              (255, 0, 0), 2)
-                cv2.putText(frame, "Class: huang-zi-yu", (int(x1_h), int(y1_h) - 10),
+                # Get the class name detected
+                class_name = r_h.names[j]
+                
+                # Draw bounding box
+                cv2.rectangle(frame, 
+                             (int(x1_h), int(y1_h)), 
+                             (int(x2_h), int(y2_h)), 
+                             (255, 0, 0), 2)
+                
+                # Put class name as text
+                cv2.putText(frame, f"Class: {class_name}", (int(x1_h), int(y1_h) - 10),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1, cv2.LINE_AA)
         return frame
+

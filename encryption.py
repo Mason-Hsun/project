@@ -16,7 +16,7 @@ class RC4:
         self.processed_files = set()
     
     def logistic_map_counter_mode(self, key_hex, num_iterations, iteration_count):
-        key_binary = bin(int(key_hex, 16))[2:]
+        key_binary = bin(int(key_hex, 16))[2:].zfill(128)
         x0 = int(key_binary[:48], 2) / 2**48
         mu = (int(key_binary[47:111], 2) * 4) / (2**64)
         i0 = int(key_binary[112:128], 2)
@@ -44,6 +44,11 @@ class RC4:
 
         return key_stream
 
+    def modify_filename(self, filepath):
+        extension = filepath.split('.')[-1]
+        new_filename = filepath.split('.')[0] + '_encryption.' + extension
+        return new_filename
+    
     def RC4_img(self, filepath):
         now = datetime.now()
         if not self.key_written:
@@ -52,26 +57,43 @@ class RC4:
         else:
             key_stream = self.generate_key()
 
-        
-        output_image_path = filepath
+        output_image_path = self.modify_filename(filepath)
     
         frame = cv2.imread(filepath)
         height = frame.shape[0]
         weight = frame.shape[1]
-        channels = frame.shape[2]
+        #channels = frame.shape[2]
         i = 0
         for row in range(height):
             for col in range(weight):
-                for c in range(channels):
-                    frame[row, col, c] = frame[row, col, c] ^ int(key_stream[i % len(key_stream)])
-                    i += 1
+                # 从密钥流中获取对应的密钥值
+                key_value = key_stream[i % len(key_stream)]  # 使用取模操作循环使用密钥流中的值
+
+                # 将像素值拆分为 3 个 8 位字节
+                pixel = frame[row, col]
+                r, g, b = pixel[0], pixel[1], pixel[2]
+
+                # 将密钥值转换为二进制并拆分为三个8位字节
+                key_binary = bin(key_value)[2:].zfill(24)
+                key_r = int(key_binary[:8], 2)
+                key_g = int(key_binary[8:16], 2)
+                key_b = int(key_binary[16:], 2)
+
+                # 执行 XOR 运算
+                new_r = r ^ key_r
+                new_g = g ^ key_g
+                new_b = b ^ key_b
+
+                # 更新像素值
+                frame[row, col] = [new_r, new_g, new_b]
+                i += 1
+                
         print("Encryption photos\n")
         # 保存加密後的圖片
         cv2.imwrite(output_image_path, frame)
 
 
     def run(self):
-
         while True:
             if not os.path.exists(self.save_directory) or len(os.listdir(self.save_directory)) == 0:
                 time.sleep(1)
@@ -79,7 +101,7 @@ class RC4:
             # 獲取目錄中的所有文件
             files = os.listdir(self.save_directory)
             # 過濾出照片文件
-            image_files = [file for file in files if file.lower().endswith(('.png', '.jpg', '.jpeg')) and file not in self.processed_files]
+            image_files = [file for file in files if file.lower().endswith(('.png', '.jpg', '.jpeg')) and file not in self.processed_files and "encryption" not in file]
             if image_files:
                 # 取第一張照片進行加密
                 uploaded_image_path = os.path.join(self.save_directory, image_files[0])
@@ -94,4 +116,3 @@ class RC4:
     def start_thread(self):
         thread1 = threading.Thread(target=self.run)
         thread1.start()
-

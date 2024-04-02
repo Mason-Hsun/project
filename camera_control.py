@@ -2,6 +2,7 @@ import os
 import cv2 
 import time
 import pygame
+import utils
 import numpy as np
 import trash_detect
 import threading
@@ -45,13 +46,16 @@ class CameraObject():
         return success, frame
     
     def save_photo(self, frame, save_directory):
-        print("\nSave Image")
-        time.sleep(1)
+        print("Save Image")
+        time.sleep(0.5)
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         file_index = len(os.listdir(save_directory)) + 1
-        filename = "image{}_{}.jpg".format(timestamp, file_index)
+        filename = "image{}_{}.png".format(timestamp, file_index)
         cv2.imwrite(os.path.join(save_directory, filename), frame)
-        time.sleep(1)
+        origin_image_dir = os.path.join(os.getcwd(),"not_encryption")
+        utils.make_dir(origin_image_dir)
+        cv2.imwrite(os.path.join(origin_image_dir,filename),frame)
+        time.sleep(0.5)
 
     def control_servo(self):
         pygame.init()

@@ -1,10 +1,11 @@
 import os
+import sys
 import socket
 import time
 import threading
 class FileSender:
     def __init__(self, local_dir):
-        self.server_ip = "192.168.0.103" # pc ip
+        self.server_ip = "120.101.8.117" # pc ip
         self.server_port = 8888
         self.local_dir = local_dir
 
@@ -23,7 +24,7 @@ class FileSender:
                     client_socket.sendall(chunk)
 
             print(f"File {file_name} sent success")
-            os.remove(file_path)
+            #os.remove(file_path)
 
         except Exception as e:
             print(f"錯誤：{e}")
@@ -33,7 +34,8 @@ class FileSender:
     
     def get_encryption_images(self):
         files = os.listdir(self.local_dir)
-        return files
+        encryption_images = [file for file in files if "encryption" in file]
+        return encryption_images
 
     def run(self):
         while True:
