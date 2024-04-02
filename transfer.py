@@ -5,7 +5,7 @@ import time
 import threading
 class FileSender:
     def __init__(self, local_dir):
-        self.server_ip = "120.101.8.117" # pc ip
+        self.server_ip = "192.168.0.103" # pc ip
         self.server_port = 8888
         self.local_dir = local_dir
 
@@ -23,9 +23,8 @@ class FileSender:
                 for chunk in iter(lambda: file.read(1024), b''):
                     client_socket.sendall(chunk)
 
-            print(f"File {file_name} sent success")
-            #os.remove(file_path)
-
+            print(f"\nFile {file_name} sent success\n")
+            os.remove(file_path)
         except Exception as e:
             print(f"錯誤：{e}")
 
@@ -41,11 +40,11 @@ class FileSender:
         while True:
             encryption_images = self.get_encryption_images()
             if len(encryption_images) == 0:
-                time.sleep(10)
+                time.sleep(3)
             else:
                 for image in encryption_images:
                     self.send_file(os.path.join(self.local_dir, image))
-                time.sleep(10)
+                time.sleep(3)
             
             
     def start_thread(self):

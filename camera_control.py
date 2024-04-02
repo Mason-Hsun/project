@@ -23,7 +23,7 @@ class CameraObject():
         try:
             self.camera = cv2.VideoCapture(0)
             self.is_opened = self.camera.isOpened()
-            print("PiCamera opened successfully")
+            print("\nPiCamera opened successfully\n")
         except picamera.exc.PiCameraError:
             print("Failed to open PiCamera")
             exit(1)
@@ -46,11 +46,11 @@ class CameraObject():
         return success, frame
     
     def save_photo(self, frame, save_directory):
-        print("Save Image")
         time.sleep(0.5)
-        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
         file_index = len(os.listdir(save_directory)) + 1
-        filename = "image{}_{}.png".format(timestamp, file_index)
+        filename = "image_{}.png".format(timestamp, file_index)
+        print("\n{} save success\n".format(filename))
         cv2.imwrite(os.path.join(save_directory, filename), frame)
         origin_image_dir = os.path.join(os.getcwd(),"not_encryption")
         utils.make_dir(origin_image_dir)

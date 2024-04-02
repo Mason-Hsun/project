@@ -88,7 +88,7 @@ class RC4:
                 frame[row, col] = [new_r, new_g, new_b]
                 i += 1
                 
-        print("Encryption photos\n")
+        print("\n{} encryption success\n".format(os.path.basename(filepath)))
         # 保存加密後的圖片
         cv2.imwrite(output_image_path, frame)
 
